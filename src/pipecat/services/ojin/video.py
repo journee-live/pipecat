@@ -533,7 +533,12 @@ class OjinVideoService(FrameProcessor):
                 else:
                     logger.debug(f"frame miss, repeating frame {frame_count}")
                     video_frame = VideoFrame(
-                        image_bytes=self._last_played_image_bytes, is_first_speech_frame=False
+                        frame_idx=frame_count,
+                        image_bytes=self._last_played_image_bytes,
+                        audio_bytes=b"",
+                        is_final=False,
+                        volume=1,
+                        is_first_speech_frame=False,
                     )
             else:
                 video_frame = await self._consume_idle_frame(num_next_silence_frames)
