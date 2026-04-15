@@ -397,10 +397,19 @@ class OjinVideoService(FrameProcessor):
     async def _receive_ojin_messages(self):
         """Continuously receive and process messages from the server."""
         while True:
-            assert self._client is not None
-            message = await self._client.receive_message()
-            if message is not None:
-                await self._handle_ojin_message(message)
+            client = self._client
+            if client is None:
+                break
+            try:
+                message = await client.receive_message()
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                logger.debug(f"Ojin receive loop exiting: {e}")
+                break
+            if self._client is None or message is None:
+                break
+            await self._handle_ojin_message(message)
 
     async def _video_playback_loop(self):
         """Main playback loop — state machine with audio-as-clock sync.
