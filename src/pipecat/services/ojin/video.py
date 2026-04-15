@@ -562,7 +562,15 @@ class OjinVideoService(FrameProcessor):
                 output_vide_frame = await self.prepare_video_frame(
                     video_frame.image_bytes, video_frame.is_first_speech_frame
                 )
-                await self.push_frame(output_vide_frame)
+                if output_vide_frame is None:
+                    logger.warning(
+                        f"Dropping undecodable video frame "
+                        f"(frame_idx={video_frame.frame_idx}, "
+                        f"is_silence={video_frame.is_silence()}, "
+                        f"image_bytes_len={len(video_frame.image_bytes)})"
+                    )
+                else:
+                    await self.push_frame(output_vide_frame)
 
             if audio_frame is not None:
                 await self.push_frame(audio_frame)
